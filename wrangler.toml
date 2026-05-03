@@ -1,5 +1,5 @@
-Stocks/
-├── wrangler.toml
-└── public/
-    ├── stock-comparison-sheet.html
-    └── stock-research-journal.html
+name = "stock-research-tools"
+compatibility_date = "2026-05-03"
+
+[site]
+bucket = "./public"
