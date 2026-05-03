@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stock Research Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0E0E0E;
+    --bg2: #161616;
+    --bg3: #1E1E1E;
+    --border: #2A2A2A;
+    --border2: #333;
+    --text: #F0EDE8;
+    --text2: #9A9690;
+    --text3: #5A5652;
+    --accent: #D4FF57;
+    --accent2: #9ECC2F;
+    --green: #4CAF50;
+    --green-bg: #0D1F0D;
+    --green-border: #2A5C2A;
+    --green-text: #7FD97F;
+    --amber: #F5A623;
+    --amber-bg: #1E1500;
+    --amber-border: #5C4000;
+    --amber-text: #F5C842;
+    --red: #E05252;
+    --red-bg: #1F0D0D;
+    --red-border: #5C2A2A;
+    --red-text: #F08080;
+    --radius: 8px;
+    --radius-lg: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 2.5rem 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .logo-area h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .logo-area h1 span { color: var(--accent); }
+
+  .logo-area p {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 4px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: .04em;
+  }
+
+  .header-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  /* MAIN LAYOUT */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 2.5rem 4rem;
+  }
+
+  /* STOCK NAME INPUT */
+  .stock-name-wrap {
+    margin-bottom: 2rem;
+  }
+
+  .stock-name-wrap label {
+    display: block;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text3);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .stock-name-wrap input {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 600;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color .2s;
+    letter-spacing: -0.01em;
+  }
+
+  .stock-name-wrap input::placeholder { color: var(--text3); }
+  .stock-name-wrap input:focus { border-color: var(--accent); }
+
+  /* METRICS GRID */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 600px) {
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .metric-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+
+  .metric-card .label {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin-bottom: 6px;
+  }
+
+  .metric-card .value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .metric-card .value.green { color: var(--green-text); }
+  .metric-card .value.red { color: var(--red-text); }
+  .metric-card .value.amber { color: var(--amber-text); }
+
+  /* SCORE BAR */
+  .score-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .score-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+
+  .score-track {
+    background: var(--bg3);
+    border-radius: 20px;
+    height: 8px;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .score-fill {
+    height: 100%;
+    border-radius: 20px;
+    transition: width .5s ease, background .4s;
+    background: var(--accent);
+    width: 0%;
+  }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 3rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 8px;
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  /* QUESTION BLOCK */
+  .q-block {
+    margin-bottom: 2rem;
+    padding: 1.25rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition: border-color .2s;
+  }
+
+  .q-block.answered-green { border-color: var(--green-border); }
+  .q-block.answered-amber { border-color: var(--amber-border); }
+  .q-block.answered-red { border-color: var(--red-border); }
+
+  .q-text {
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  .q-text .req {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    background: var(--bg3);
+    color: var(--text3);
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* RADIO OPTIONS */
+  .options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .opt input { display: none; }
+
+  .opt-label {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    background: var(--bg3);
+    cursor: pointer;
+    transition: all .15s;
+    user-select: none;
+  }
+
+  .opt input:checked + .opt-label { font-weight: 500; }
+
+  .opt.green input:checked + .opt-label {
+    background: var(--green-bg);
+    border-color: var(--green-border);
+    color: var(--green-text);
+  }
+
+  .opt.amber input:checked + .opt-label {
+    background: var(--amber-bg);
+    border-color: var(--amber-border);
+    color: var(--amber-text);
+  }
+
+  .opt.red input:checked + .opt-label {
+    background: var(--red-bg);
+    border-color: var(--red-border);
+    color: var(--red-text);
+  }
+
+  .opt-label:hover {
+    border-color: var(--border2);
+    color: var(--text);
+  }
+
+  /* TEXTAREA */
+  textarea {
+    width: 100%;
+    min-height: 70px;
+    resize: vertical;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color .2s;
+  }
+
+  textarea::placeholder { color: var(--text3); }
+  textarea:focus { border-color: var(--border2); }
+
+  /* VERDICT */
+  .verdict-box {
+    display: none;
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-top: 1rem;
+    border: 1px solid var(--border);
+  }
+
+  .verdict-box.green { background: var(--green-bg); border-color: var(--green-border); }
+  .verdict-box.amber { background: var(--amber-bg); border-color: var(--amber-border); }
+  .verdict-box.red { background: var(--red-bg); border-color: var(--red-border); }
+
+  .verdict-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-bottom: 6px;
+  }
+
+  .verdict-box.green .verdict-tag { color: var(--green-text); }
+  .verdict-box.amber .verdict-tag { color: var(--amber-text); }
+  .verdict-box.red .verdict-tag { color: var(--red-text); }
+
+  .verdict-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .verdict-box.green .verdict-title { color: var(--green-text); }
+  .verdict-box.amber .verdict-title { color: var(--amber-text); }
+  .verdict-box.red .verdict-title { color: var(--red-text); }
+
+  .verdict-text {
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+
+  .verdict-box.green .verdict-text { color: var(--green-text); opacity: .85; }
+  .verdict-box.amber .verdict-text { color: var(--amber-text); opacity: .85; }
+  .verdict-box.red .verdict-text { color: var(--red-text); opacity: .85; }
+
+  .verdict-stats {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    opacity: .6;
+  }
+
+  .verdict-box.green .verdict-stats { color: var(--green-text); }
+  .verdict-box.amber .verdict-stats { color: var(--amber-text); }
+  .verdict-box.red .verdict-stats { color: var(--red-text); }
+
+  /* BUTTONS */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px 20px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border2);
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .02em;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0E0E0E;
+    border-color: var(--accent);
+    flex: 1;
+  }
+
+  .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+
+  .btn-secondary {
+    background: var(--bg2);
+    color: var(--text2);
+    border-color: var(--border2);
+  }
+
+  .btn-secondary:hover { color: var(--text); border-color: var(--text3); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text3);
+    border-color: var(--border);
+  }
+
+  .btn-ghost:hover { color: var(--text2); }
+
+  /* PRINT BUTTON */
+  .btn-print {
+    background: transparent;
+    color: var(--text3);
+    border-color: var(--border);
+    font-size: 12px;
+    padding: 8px 14px;
+  }
+
+  /* HISTORY */
+  .history-section {
+    margin-top: 3rem;
+    border-top: 1px solid var(--border);
+    padding-top: 2rem;
+  }
+
+  .history-title {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 1rem;
+  }
+
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+
+  .history-item:hover { border-color: var(--border2); }
+
+  .history-item .h-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .history-item .h-score {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+
+  .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  .badge-green { background: var(--green-bg); color: var(--green-text); border: 1px solid var(--green-border); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber-text); border: 1px solid var(--amber-border); }
+  .badge-red { background: var(--red-bg); color: var(--red-text); border: 1px solid var(--red-border); }
+
+  .history-item .h-right { display: flex; align-items: center; gap: 8px; }
+
+  .h-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+  }
+
+  .empty-history {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    padding: 1rem 0;
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2rem 0;
+  }
+
+  @media print {
+    body { background: #fff; color: #000; }
+    .btn-row, .history-section { display: none; }
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 1.5rem; }
+    .container { padding: 1.5rem 1.25rem 3rem; }
+    .btn-row { flex-direction: column; }
+    .btn-primary, .btn-secondary { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <h1>Stock Research <span>Journal</span></h1>
+    <p>NGX Small-Cap Screener &mdash; 5-Year Aggressive Portfolio</p>
+  </div>
+  <span class="header-badge" id="today-date"></span>
+</header>
+
+<div class="container">
+
+  <!-- STOCK NAME -->
+  <div class="stock-name-wrap">
+    <label>Company / Ticker</label>
+    <input type="text" id="stock-name" placeholder="e.g. Transcorp, Japaul Gold, Caverton..." />
+  </div>
+
+  <!-- METRICS -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="label">Answered</div>
+      <div class="value" id="answered-count">0 / 18</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Green flags</div>
+      <div class="value green" id="green-count">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Red flags</div>
+      <div class="value red" id="red-count">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Score</div>
+      <div class="value" id="score-pct">0%</div>
+    </div>
+  </div>
+
+  <!-- SCORE BAR -->
+  <div class="score-section">
+    <div class="score-header"><span>Research score</span><span id="score-label-right">Answer questions to build your score</span></div>
+    <div class="score-track"><div class="score-fill" id="score-fill"></div></div>
+  </div>
+
+  <!-- SECTIONS -->
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Business Fundamentals</span>
+    </div>
+    <div id="q1" class="q-block">
+      <p class="q-text">Do you understand what this company does and how it makes money? <span class="req">required</span></p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q1" value="green"><span class="opt-label">Yes, clearly</span></label>
+        <label class="opt amber"><input type="radio" name="q1" value="amber"><span class="opt-label">Somewhat</span></label>
+        <label class="opt red"><input type="radio" name="q1" value="red"><span class="opt-label">Not really</span></label>
+      </div>
+      <textarea id="q1-note" placeholder="Explain the business model in your own words..."></textarea>
+    </div>
+    <div id="q2" class="q-block">
+      <p class="q-text">Does the company have a strong competitive advantage in its sector?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q2" value="green"><span class="opt-label">Yes</span></label>
+        <label class="opt amber"><input type="radio" name="q2" value="amber"><span class="opt-label">Somewhat</span></label>
+        <label class="opt red"><input type="radio" name="q2" value="red"><span class="opt-label">No</span></label>
+      </div>
+      <textarea id="q2-note" placeholder="What makes it stand out from competitors?"></textarea>
+    </div>
+    <div id="q3" class="q-block">
+      <p class="q-text">Is the management team reputable and experienced?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q3" value="green"><span class="opt-label">Yes</span></label>
+        <label class="opt amber"><input type="radio" name="q3" value="amber"><span class="opt-label">Unsure</span></label>
+        <label class="opt red"><input type="radio" name="q3" value="red"><span class="opt-label">No / red flags</span></label>
+      </div>
+      <textarea id="q3-note" placeholder="What do you know about the leadership team?"></textarea>
+    </div>
+    <div id="q4" class="q-block">
+      <p class="q-text">Has the company been listed on the NGX for at least 3 years?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q4" value="green"><span class="opt-label">Yes</span></label>
+        <label class="opt red"><input type="radio" name="q4" value="red"><span class="opt-label">No</span></label>
+      </div>
+      <textarea id="q4-note" placeholder="When was it listed? Any notable history?"></textarea>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Financial Health</span>
+    </div>
+    <div id="q5" class="q-block">
+      <p class="q-text">Is the company currently profitable?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q5" value="green"><span class="opt-label">Yes</span></label>
+        <label class="opt amber"><input type="radio" name="q5" value="amber"><span class="opt-label">Breaking even</span></label>
+        <label class="opt red"><input type="radio" name="q5" value="red"><span class="opt-label">No</span></label>
+      </div>
+      <textarea id="q5-note" placeholder="Note profit/loss figures from latest financials..."></textarea>
+    </div>
+    <div id="q6" class="q-block">
+      <p class="q-text">Has revenue grown consistently over the last 3 years?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q6" value="green"><span class="opt-label">Yes</span></label>
+        <label class="opt amber"><input type="radio" name="q6" value="amber"><span class="opt-label">Mixed</span></label>
+        <label class="opt red"><input type="radio" name="q6" value="red"><span class="opt-label">Declining</span></label>
+      </div>
+      <textarea id="q6-note" placeholder="Add revenue figures for the last 3 years..."></textarea>
+    </div>
+    <div id="q7" class="q-block">
+      <p class="q-text">Is the company's debt level manageable?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q7" value="green"><span class="opt-label">Low debt</span></label>
+        <label class="opt amber"><input type="radio" name="q7" value="amber"><span class="opt-label">Moderate</span></label>
+        <label class="opt red"><input type="radio" name="q7" value="red"><span class="opt-label">High / risky</span></label>
+      </div>
+      <textarea id="q7-note" placeholder="Note debt-to-equity ratio or any loan concerns..."></textarea>
+    </div>
+    <div id="q8" class="q-block">
+      <p class="q-text">Is the stock fairly valued or undervalued (P/E ratio check)?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q8" value="green"><span class="opt-label">Undervalued</span></label>
+        <label class="opt amber"><input type="radio" name="q8" value="amber"><span class="opt-label">Fair value</span></label>
+        <label class="opt red"><input type="radio" name="q8" value="red"><span class="opt-label">Overpriced</span></label>
+      </div>
+      <textarea id="q8-note" placeholder="What is the current P/E ratio? Compare to sector average..."></textarea>
+    </div>
+    <div id="q9" class="q-block">
+      <p class="q-text">Does the company pay dividends consistently?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q9" value="green"><span class="opt-label">Yes</span></label>
+        <label class="opt amber"><input type="radio" name="q9" value="amber"><span class="opt-label">Occasionally</span></label>
+        <label class="opt red"><input type="radio" name="q9" value="red"><span class="opt-label">Never</span></label>
+      </div>
+      <textarea id="q9-note" placeholder="Note dividend history and yield..."></textarea>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Growth Potential</span>
+    </div>
+    <div id="q10" class="q-block">
+      <p class="q-text">Is the sector this company operates in growing in Nigeria?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q10" value="green"><span class="opt-label">Yes, strongly</span></label>
+        <label class="opt amber"><input type="radio" name="q10" value="amber"><span class="opt-label">Slowly</span></label>
+        <label class="opt red"><input type="radio" name="q10" value="red"><span class="opt-label">Declining</span></label>
+      </div>
+      <textarea id="q10-note" placeholder="Why do you believe the sector will grow?"></textarea>
+    </div>
+    <div id="q11" class="q-block">
+      <p class="q-text">Does the company have expansion plans, new products, or major contracts?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q11" value="green"><span class="opt-label">Yes</span></label>
+        <label class="opt amber"><input type="radio" name="q11" value="amber"><span class="opt-label">Unclear</span></label>
+        <label class="opt red"><input type="radio" name="q11" value="red"><span class="opt-label">No</span></label>
+      </div>
+      <textarea id="q11-note" placeholder="What growth catalysts have you identified?"></textarea>
+    </div>
+    <div id="q12" class="q-block">
+      <p class="q-text">Is government policy or regulation likely to help this company?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q12" value="green"><span class="opt-label">Favorable</span></label>
+        <label class="opt amber"><input type="radio" name="q12" value="amber"><span class="opt-label">Neutral</span></label>
+        <label class="opt red"><input type="radio" name="q12" value="red"><span class="opt-label">Unfavorable</span></label>
+      </div>
+      <textarea id="q12-note" placeholder="Any relevant CBN, SEC, or NNPCL policies worth noting?"></textarea>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Risk Assessment</span>
+    </div>
+    <div id="q13" class="q-block">
+      <p class="q-text">How liquid is this stock on the NGX?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q13" value="green"><span class="opt-label">Highly liquid</span></label>
+        <label class="opt amber"><input type="radio" name="q13" value="amber"><span class="opt-label">Moderate</span></label>
+        <label class="opt red"><input type="radio" name="q13" value="red"><span class="opt-label">Thinly traded</span></label>
+      </div>
+      <textarea id="q13-note" placeholder="Check average daily trading volume on NGX..."></textarea>
+    </div>
+    <div id="q14" class="q-block">
+      <p class="q-text">What are the biggest risks that could hurt this stock?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q14" value="green"><span class="opt-label">Manageable risks</span></label>
+        <label class="opt amber"><input type="radio" name="q14" value="amber"><span class="opt-label">Some concerns</span></label>
+        <label class="opt red"><input type="radio" name="q14" value="red"><span class="opt-label">Major red flags</span></label>
+      </div>
+      <textarea id="q14-note" placeholder="List the top 3 risks you identified..."></textarea>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Bias Check</span>
+    </div>
+    <div id="q15" class="q-block">
+      <p class="q-text">Am I buying this based on real research, not hype or a tip?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q15" value="green"><span class="opt-label">Yes, researched</span></label>
+        <label class="opt amber"><input type="radio" name="q15" value="amber"><span class="opt-label">Partly</span></label>
+        <label class="opt red"><input type="radio" name="q15" value="red"><span class="opt-label">Mostly hype</span></label>
+      </div>
+      <textarea id="q15-note" placeholder="Where did you first hear about this stock?"></textarea>
+    </div>
+    <div id="q16" class="q-block">
+      <p class="q-text">If the price drops 40%, will I hold or panic sell?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q16" value="green"><span class="opt-label">I will hold</span></label>
+        <label class="opt amber"><input type="radio" name="q16" value="amber"><span class="opt-label">Depends</span></label>
+        <label class="opt red"><input type="radio" name="q16" value="red"><span class="opt-label">I will sell</span></label>
+      </div>
+      <textarea id="q16-note" placeholder="Be honest — what would you actually do?"></textarea>
+    </div>
+    <div id="q17" class="q-block">
+      <p class="q-text">Have I compared this stock to at least 2 alternatives in the same sector?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q17" value="green"><span class="opt-label">Yes</span></label>
+        <label class="opt red"><input type="radio" name="q17" value="red"><span class="opt-label">No</span></label>
+      </div>
+      <textarea id="q17-note" placeholder="Name the alternatives you compared..."></textarea>
+    </div>
+    <div id="q18" class="q-block">
+      <p class="q-text">Do I have a clear exit strategy for this stock?</p>
+      <div class="options">
+        <label class="opt green"><input type="radio" name="q18" value="green"><span class="opt-label">Yes</span></label>
+        <label class="opt amber"><input type="radio" name="q18" value="amber"><span class="opt-label">Vague idea</span></label>
+        <label class="opt red"><input type="radio" name="q18" value="red"><span class="opt-label">No plan</span></label>
+      </div>
+      <textarea id="q18-note" placeholder="Under what conditions would you sell? Price target? Time?"></textarea>
+    </div>
+  </div>
+
+  <!-- VERDICT -->
+  <div id="verdict-box" class="verdict-box">
+    <div class="verdict-tag" id="v-tag"></div>
+    <div class="verdict-title" id="v-title"></div>
+    <div class="verdict-text" id="v-text"></div>
+    <div class="verdict-stats" id="v-stats"></div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="calcScore()">Calculate verdict</button>
+    <button class="btn btn-secondary" onclick="saveEntry()">Save to history</button>
+    <button class="btn btn-secondary btn-print" onclick="window.print()">Print / PDF</button>
+    <button class="btn btn-ghost" onclick="resetAll()">Reset</button>
+    <button class="btn btn-ghost" onclick="window.open('stock-comparison-sheet.html', '_blank')">← Back to Comparison Sheet</button>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="history-section">
+    <p class="history-title">Research history</p>
+    <div id="history-list" class="history-list"><p class="empty-history">No saved entries yet. Research a stock and click &ldquo;Save to history&rdquo;.</p></div>
+  </div>
+
+</div>
+
+<script>
+// Questions config
+const qs = [
+  {name:'q1',weight:2},{name:'q2',weight:2},{name:'q3',weight:2},{name:'q4',weight:1},
+  {name:'q5',weight:3},{name:'q6',weight:3},{name:'q7',weight:2},{name:'q8',weight:2},{name:'q9',weight:1},
+  {name:'q10',weight:2},{name:'q11',weight:2},{name:'q12',weight:1},
+  {name:'q13',weight:2},{name:'q14',weight:2},
+  {name:'q15',weight:3},{name:'q16',weight:2},{name:'q17',weight:1},{name:'q18',weight:2}
+];
+
+// Set date
+const now = new Date();
+document.getElementById('today-date').textContent = now.toLocaleDateString('en-NG', {weekday:'short', year:'numeric', month:'short', day:'numeric'});
+
+function getVal(name) {
+  const el = document.querySelector('input[name="'+name+'"]:checked');
+  return el ? el.value : null;
+}
+
+function calcRaw() {
+  let answered = 0, greens = 0, ambers = 0, reds = 0, score = 0, maxScore = 0;
+  qs.forEach(q => {
+    const v = getVal(q.name);
+    maxScore += q.weight * 2;
+    if (v) {
+      answered++;
+      if (v === 'green') { greens++; score += q.weight * 2; }
+      else if (v === 'amber') { ambers++; score += q.weight; }
+      else if (v === 'red') { reds++; }
+    }
+  });
+  const pct = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+  return { answered, greens, ambers, reds, score, maxScore, pct };
+}
+
+function updateLive() {
+  const { answered, greens, reds, pct } = calcRaw();
+  document.getElementById('answered-count').textContent = answered + ' / 18';
+  document.getElementById('green-count').textContent = greens;
+  document.getElementById('red-count').textContent = reds;
+  document.getElementById('score-pct').textContent = pct + '%';
+  const fill = document.getElementById('score-fill');
+  fill.style.width = pct + '%';
+  fill.style.background = pct >= 70 ? '#D4FF57' : pct >= 45 ? '#F5A623' : '#E05252';
+  document.getElementById('score-label-right').textContent = pct + '% research score';
+
+  // Color q-blocks
+  qs.forEach(q => {
+    const v = getVal(q.name);
+    const block = document.getElementById(q.name);
+    block.className = 'q-block' + (v ? ' answered-' + v : '');
+  });
+}
+
+function calcScore() {
+  const { answered, greens, ambers, reds, pct } = calcRaw();
+  const name = document.getElementById('stock-name').value.trim() || 'This stock';
+  const box = document.getElementById('verdict-box');
+
+  let cls, tag, title, text;
+  if (answered < 10) {
+    cls = 'amber';
+    tag = 'Incomplete — ' + pct + '% score';
+    title = 'Answer more questions';
+    text = 'You have only answered ' + answered + ' out of 18 questions. Answer at least 10 to get a meaningful verdict.';
+  } else if (pct >= 75) {
+    cls = 'green';
+    tag = 'Strong buy candidate — ' + pct + '% score';
+    title = '✓ Green light';
+    text = name + ' passes most of your checks. The fundamentals look solid for a 5-year hold. Proceed with conviction — but size your position carefully as a small-cap. Keep reinvesting dividends.';
+  } else if (pct >= 55) {
+    cls = 'amber';
+    tag = 'Proceed with caution — ' + pct + '% score';
+    title = '⚠ Yellow light';
+    text = name + ' has solid green flags but also unresolved concerns. Do more research before committing. Consider starting with a smaller position and reviewing again in 4–6 weeks.';
+  } else if (pct >= 35) {
+    cls = 'amber';
+    tag = 'High risk — ' + pct + '% score';
+    title = '⚠ Too many unknowns';
+    text = 'There are too many unresolved questions on ' + name + '. The risk level is high relative to your 5-year aggressive growth goal. Find a stronger alternative in the same sector before committing your ₦4,000/week.';
+  } else {
+    cls = 'red';
+    tag = 'Do not invest yet — ' + pct + '% score';
+    title = '✕ Red light';
+    text = name + ' has too many red flags. Your weekly ₦4,000 is better deployed elsewhere. Revisit only if the company\'s fundamentals improve significantly.';
+  }
+
+  box.className = 'verdict-box ' + cls;
+  box.style.display = 'block';
+  document.getElementById('v-tag').textContent = tag;
+  document.getElementById('v-title').textContent = title;
+  document.getElementById('v-text').textContent = text;
+  document.getElementById('v-stats').textContent = greens + ' green · ' + ambers + ' amber · ' + reds + ' red  |  ' + answered + '/18 answered';
+  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function saveEntry() {
+  const name = document.getElementById('stock-name').value.trim();
+  if (!name) { alert('Please enter a company name before saving.'); return; }
+  const { pct, greens, reds, answered } = calcRaw();
+  const entries = JSON.parse(localStorage.getItem('srj-history') || '[]');
+  const entry = {
+    name,
+    pct,
+    greens,
+    reds,
+    answered,
+    date: new Date().toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }),
+    notes: qs.map(q => ({ q: q.name, v: getVal(q.name), note: document.getElementById(q.name + '-note').value }))
+  };
+  // replace if same name exists
+  const idx = entries.findIndex(e => e.name.toLowerCase() === name.toLowerCase());
+  if (idx >= 0) entries[idx] = entry; else entries.unshift(entry);
+  localStorage.setItem('srj-history', JSON.stringify(entries.slice(0, 20)));
+  renderHistory();
+  alert(name + ' saved to history!');
+}
+
+function renderHistory() {
+  const entries = JSON.parse(localStorage.getItem('srj-history') || '[]');
+  const list = document.getElementById('history-list');
+  if (!entries.length) {
+    list.innerHTML = '<p class="empty-history">No saved entries yet. Research a stock and click &ldquo;Save to history&rdquo;.</p>';
+    return;
+  }
+  list.innerHTML = entries.map((e, i) => {
+    const cls = e.pct >= 75 ? 'badge-green' : e.pct >= 45 ? 'badge-amber' : 'badge-red';
+    const label = e.pct >= 75 ? 'Strong buy' : e.pct >= 55 ? 'Caution' : e.pct >= 35 ? 'High risk' : 'Avoid';
+    return '<div class="history-item" onclick="loadEntry('+i+')">'
+      + '<span class="h-name">'+e.name+'</span>'
+      + '<span class="h-right"><span class="h-date">'+e.date+'</span><span class="badge '+cls+'">'+e.pct+'% &mdash; '+label+'</span></span>'
+      + '</div>';
+  }).join('');
+}
+
+function loadEntry(i) {
+  const entries = JSON.parse(localStorage.getItem('srj-history') || '[]');
+  const e = entries[i];
+  if (!e) return;
+  resetAll(true);
+  document.getElementById('stock-name').value = e.name;
+  e.notes.forEach(n => {
+    if (n.v) {
+      const radio = document.querySelector('input[name="'+n.q+'"][value="'+n.v+'"]');
+      if (radio) radio.checked = true;
+    }
+    const ta = document.getElementById(n.q + '-note');
+    if (ta && n.note) ta.value = n.note;
+  });
+  updateLive();
+  calcScore();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetAll(silent) {
+  document.getElementById('stock-name').value = '';
+  qs.forEach(q => {
+    const checked = document.querySelector('input[name="'+q.name+'"]:checked');
+    if (checked) checked.checked = false;
+    const ta = document.getElementById(q.name + '-note');
+    if (ta) ta.value = '';
+    document.getElementById(q.name).className = 'q-block';
+  });
+  document.getElementById('verdict-box').style.display = 'none';
+  updateLive();
+}
+
+// Attach listeners
+qs.forEach(q => {
+  document.querySelectorAll('input[name="'+q.name+'"]').forEach(r => {
+    r.addEventListener('change', updateLive);
+  });
+});
+
+renderHistory();
+</script>
+</body>
+</html>

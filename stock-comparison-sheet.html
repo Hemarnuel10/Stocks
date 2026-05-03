@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Stock Comparison Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0A0A0A;
+  --bg2: #111111;
+  --bg3: #1A1A1A;
+  --bg4: #222222;
+  --border: #242424;
+  --border2: #2E2E2E;
+  --text: #F2EFE9;
+  --text2: #888480;
+  --text3: #484440;
+  --accent: #C8F135;
+  --accent-dim: #8AAF1F;
+  --green: #3ECF6A;
+  --green-bg: #071A0F;
+  --green-border: #1A4D2A;
+  --green-text: #6EE89A;
+  --red: #E04F4F;
+  --red-bg: #1A0707;
+  --red-border: #4D1A1A;
+  --red-text: #F08080;
+  --amber: #F5A623;
+  --amber-bg: #1A1000;
+  --amber-border: #4D3300;
+  --amber-text: #F5C84A;
+  --gold: #FFD700;
+  --silver: #C0C0C0;
+  --bronze: #CD7F32;
+  --r: 8px;
+  --rl: 14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* NOISE TEXTURE OVERLAY */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.4;
+}
+
+/* HEADER */
+header{
+  position:relative;z-index:10;
+  border-bottom:1px solid var(--border);
+  padding:2rem 2.5rem 1.75rem;
+  display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;
+  background:linear-gradient(180deg,#111 0%,transparent 100%);
+}
+.logo h1{font-size:20px;font-weight:800;letter-spacing:-.03em;color:var(--text);}
+.logo h1 em{color:var(--accent);font-style:normal;}
+.logo p{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);margin-top:3px;letter-spacing:.06em;}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);border:1px solid var(--border2);padding:4px 10px;border-radius:20px;}
+.btn-small{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:7px 14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .15s;}
+.btn-small:hover{color:var(--text);border-color:var(--border2);}
+.btn-accent{background:var(--accent);color:#0A0A0A;border-color:var(--accent);}
+.btn-accent:hover{background:var(--accent-dim);border-color:var(--accent-dim);color:#0A0A0A;}
+
+/* CONTAINER */
+.wrap{max-width:1100px;margin:0 auto;padding:2rem 2rem 5rem;position:relative;z-index:5;}
+
+/* SETUP PANEL */
+.setup-panel{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);
+  padding:1.5rem;margin-bottom:2rem;
+  display:grid;grid-template-columns:1fr 1fr auto;gap:1rem;align-items:end;
+}
+@media(max-width:640px){.setup-panel{grid-template-columns:1fr;}}
+.field label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:6px;}
+.field input,.field select{
+  width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);
+  color:var(--text);font-family:'Syne',sans-serif;font-size:14px;font-weight:500;
+  padding:10px 12px;outline:none;transition:border-color .2s;
+}
+.field input::placeholder{color:var(--text3);}
+.field input:focus,.field select:focus{border-color:var(--accent);}
+.field select option{background:#1A1A1A;}
+
+/* STOCK HEADER INPUTS */
+.stock-headers{
+  display:grid;gap:8px;margin-bottom:1.5rem;
+}
+.stock-head-input{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+  padding:10px 14px;display:flex;align-items:center;gap:10px;
+}
+.stock-num{
+  font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);
+  background:var(--bg3);border:1px solid var(--border);border-radius:20px;
+  padding:2px 8px;white-space:nowrap;
+}
+.stock-head-input input{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--text);font-family:'Syne',sans-serif;font-size:15px;font-weight:600;
+  letter-spacing:-.01em;
+}
+.stock-head-input input::placeholder{color:var(--text3);}
+.color-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* COMPARISON TABLE */
+.table-wrap{overflow-x:auto;margin-bottom:2rem;border-radius:var(--rl);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;min-width:700px;}
+
+/* Section header rows */
+.sec-row td{
+  background:var(--bg3);
+  font-family:'DM Mono',monospace;font-size:10px;
+  color:var(--text3);text-transform:uppercase;letter-spacing:.1em;
+  padding:10px 16px;border-bottom:1px solid var(--border);
+  border-top:1px solid var(--border);
+}
+.sec-row td:first-child{color:var(--text2);}
+
+/* Data rows */
+.data-row td{
+  padding:0;border-bottom:1px solid var(--border);vertical-align:middle;
+}
+.data-row:last-child td{border-bottom:none;}
+.data-row td.metric-label{
+  padding:12px 16px;font-size:12px;color:var(--text2);
+  background:var(--bg2);white-space:nowrap;min-width:160px;
+  border-right:1px solid var(--border);font-weight:500;
+}
+.data-row td.metric-label span{
+  font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);
+  display:block;margin-top:2px;font-weight:400;
+}
+.cell-input{
+  width:100%;background:transparent;border:none;outline:none;
+  color:var(--text);font-family:'DM Mono',monospace;font-size:13px;
+  padding:12px 14px;text-align:center;cursor:text;
+  transition:background .15s;
+}
+.cell-input:focus{background:var(--bg3);}
+.cell-input::placeholder{color:var(--text3);font-size:11px;}
+
+td.cell{border-right:1px solid var(--border);position:relative;}
+td.cell:last-child{border-right:none;}
+
+/* Highlight states */
+td.cell.best .cell-input{color:var(--green-text);}
+td.cell.best{background:var(--green-bg);}
+td.cell.best::after{content:'▲';position:absolute;top:6px;right:6px;font-size:8px;color:var(--green-text);opacity:.6;}
+
+td.cell.worst .cell-input{color:var(--red-text);}
+td.cell.worst{background:var(--red-bg);}
+td.cell.worst::after{content:'▼';position:absolute;top:6px;right:6px;font-size:8px;color:var(--red-text);opacity:.6;}
+
+/* SCORE ROW */
+.score-row td{
+  padding:14px 16px;background:var(--bg2);border-top:2px solid var(--border2);
+  text-align:center;vertical-align:middle;
+}
+.score-row td.label-cell{text-align:left;}
+.score-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;}
+.score-val{font-size:22px;font-weight:800;letter-spacing:-.03em;margin-top:4px;}
+.score-bar-wrap{background:var(--bg3);border-radius:20px;height:5px;margin-top:6px;overflow:hidden;}
+.score-bar{height:5px;border-radius:20px;transition:width .6s ease;}
+
+/* VERDICT ROW */
+.verdict-row td{
+  padding:12px 14px;text-align:center;border-top:1px solid var(--border);
+}
+.verdict-pill{
+  display:inline-block;font-family:'DM Mono',monospace;font-size:11px;
+  padding:5px 14px;border-radius:20px;font-weight:500;
+}
+.pill-strong{background:var(--green-bg);color:var(--green-text);border:1px solid var(--green-border);}
+.pill-caution{background:var(--amber-bg);color:var(--amber-text);border:1px solid var(--amber-border);}
+.pill-avoid{background:var(--red-bg);color:var(--red-text);border:1px solid var(--red-border);}
+.pill-empty{background:var(--bg3);color:var(--text3);border:1px solid var(--border);}
+
+/* MEDAL ROW */
+.medal-row td{padding:10px 14px;text-align:center;border-top:1px solid var(--border);background:var(--bg);}
+.medal{font-size:18px;}
+.medal-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);display:block;margin-top:2px;}
+
+/* TAKE TO JOURNAL BANNER */
+.journal-banner{
+  background:linear-gradient(135deg,#0D1A00,#111);
+  border:1px solid var(--green-border);border-radius:var(--rl);
+  padding:1.25rem 1.5rem;margin-bottom:2rem;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;
+}
+.journal-banner p{font-size:13px;color:var(--green-text);}
+.journal-banner p span{font-family:'DM Mono',monospace;font-weight:500;}
+.journal-banner strong{color:var(--accent);}
+#journal-picks{font-size:16px;font-weight:700;color:var(--accent);margin-top:4px;}
+
+/* LEGEND */
+.legend{display:flex;gap:1.5rem;flex-wrap:wrap;font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:1.5rem;}
+.legend span{display:flex;align-items:center;gap:5px;}
+.dot{width:8px;height:8px;border-radius:2px;display:inline-block;}
+
+/* ACTION ROW */
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:1.5rem;}
+.btn{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;padding:11px 20px;border-radius:var(--r);border:1px solid var(--border2);cursor:pointer;transition:all .15s;}
+.btn-primary{background:var(--accent);color:#0A0A0A;border-color:var(--accent);flex:1;}
+.btn-primary:hover{background:var(--accent-dim);}
+.btn-sec{background:var(--bg2);color:var(--text2);border-color:var(--border2);}
+.btn-sec:hover{color:var(--text);border-color:var(--text3);}
+.btn-ghost{background:transparent;color:var(--text3);border-color:var(--border);}
+.btn-ghost:hover{color:var(--text2);}
+
+/* HISTORY */
+.history-section{margin-top:3rem;border-top:1px solid var(--border);padding-top:2rem;}
+.history-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem;}
+.history-grid{display:flex;flex-direction:column;gap:8px;}
+.history-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+  padding:12px 16px;cursor:pointer;transition:border-color .15s;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+}
+.history-card:hover{border-color:var(--border2);}
+.hc-sector{font-size:13px;font-weight:600;color:var(--text);}
+.hc-stocks{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);margin-top:2px;}
+.hc-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);}
+.hc-winner{font-family:'DM Mono',monospace;font-size:11px;color:var(--green-text);background:var(--green-bg);border:1px solid var(--green-border);padding:3px 10px;border-radius:20px;}
+.empty-state{font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);padding:.5rem 0;}
+
+/* STOCK COL HEADER in table */
+.col-header{
+  background:var(--bg2);border-bottom:1px solid var(--border);border-right:1px solid var(--border);
+  padding:12px 14px;text-align:center;
+}
+.col-header:last-child{border-right:none;}
+.col-name{font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.01em;}
+.col-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle;}
+.col-ticker{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-top:3px;}
+
+@media print{body{background:#fff;color:#000;}.actions,.history-section,header .header-right{display:none;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <h1>Stock <em>Comparison</em> Sheet</h1>
+    <p>NGX Sector Screener &mdash; Up to 5 stocks side by side</p>
+  </div>
+  <div class="header-right">
+    <span class="badge" id="hdr-date"></span>
+    <button class="btn-small" onclick="window.print()">Print / PDF</button>
+    <button class="btn-small btn-accent" onclick="calcAll()">Calculate scores</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- SETUP -->
+  <div class="setup-panel">
+    <div class="field">
+      <label>Sector</label>
+      <select id="sector-select" onchange="setSector()">
+        <option value="">Choose sector...</option>
+        <option>Banking</option>
+        <option>Energy / Oil & Gas</option>
+        <option>Consumer Goods</option>
+        <option>Telecommunications</option>
+        <option>Insurance</option>
+        <option>Healthcare</option>
+        <option>Agriculture</option>
+        <option>Industrial Goods</option>
+        <option>Real Estate</option>
+        <option>Technology</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Number of stocks</label>
+      <select id="stock-count" onchange="buildSheet()">
+        <option value="2">2 stocks</option>
+        <option value="3">3 stocks</option>
+        <option value="4">4 stocks</option>
+        <option value="5" selected>5 stocks</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>&nbsp;</label>
+      <button class="btn-small btn-accent" onclick="calcAll()" style="width:100%;padding:10px;">Run comparison</button>
+    </div>
+  </div>
+
+  <!-- STOCK NAME INPUTS -->
+  <div class="stock-headers" id="stock-headers"></div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <span><span class="dot" style="background:var(--green-bg);border:1px solid var(--green-border);"></span>Best in row</span>
+    <span><span class="dot" style="background:var(--red-bg);border:1px solid var(--red-border);"></span>Worst in row</span>
+    <span><span class="dot" style="background:var(--bg3);border:1px solid var(--border2);"></span>Neutral</span>
+  </div>
+
+  <!-- JOURNAL BANNER -->
+  <div class="journal-banner" id="journal-banner" style="display:block;">
+    <div>
+      <p>Top picks to take into your <strong>Research Journal</strong></p>
+      <div id="journal-picks"></div>
+    </div>
+    <p style="font-size:12px;color:var(--green-text);opacity:.7;">Run deep research on these before investing →</p>
+    
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table id="main-table"></table>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn btn-primary" onclick="calcAll()">Calculate &amp; highlight scores</button>
+    <button class="btn btn-sec" onclick="saveComparison()">Save to history</button>
+    <button class="btn btn-ghost" onclick="resetSheet()">Reset</button>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="history-section">
+    <p class="history-title">Saved comparisons</p>
+    <div id="history-grid" class="history-grid"></div>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────────────────
+const COLORS = ['#C8F135','#38BDF8','#FB923C','#A78BFA','#F472B6'];
+
+const METRICS = [
+  { section:'Profitability', rows:[
+    { key:'price',    label:'Share Price',         sub:'₦ per share',        dir:'neutral' },
+    { key:'mktcap',   label:'Market Cap',          sub:'₦ billions',         dir:'high' },
+    { key:'netprofit',label:'Net Profit',          sub:'₦ billions',         dir:'high' },
+    { key:'eps',      label:'EPS',                 sub:'Earnings per share',  dir:'high' },
+    { key:'roe',      label:'ROE (%)',             sub:'Return on equity',    dir:'high' },
+    { key:'margin',   label:'Profit Margin (%)',   sub:'Net margin',          dir:'high' },
+  ]},
+  { section:'Revenue & Growth', rows:[
+    { key:'revenue',  label:'Annual Revenue',      sub:'₦ billions',         dir:'high' },
+    { key:'revgrowth',label:'Revenue Growth (%)',  sub:'YoY growth rate',     dir:'high' },
+    { key:'grossprofit',label:'Gross Profit',      sub:'₦ billions',         dir:'high' },
+  ]},
+  { section:'Valuation', rows:[
+    { key:'pe',       label:'P/E Ratio',           sub:'Price to earnings',   dir:'low' },
+    { key:'pb',       label:'P/B Ratio',           sub:'Price to book',       dir:'low' },
+    { key:'ps',       label:'P/S Ratio',           sub:'Price to sales',      dir:'low' },
+  ]},
+  { section:'Dividends', rows:[
+    { key:'divyield', label:'Dividend Yield (%)',  sub:'Annual yield',        dir:'high' },
+    { key:'divpayout',label:'Payout Ratio (%)',    sub:'% of profit paid out',dir:'neutral' },
+  ]},
+  { section:'Debt & Strength', rows:[
+    { key:'de',       label:'D/E Ratio',           sub:'Debt to equity',      dir:'low' },
+    { key:'current',  label:'Current Ratio',       sub:'Liquidity ratio',     dir:'high' },
+    { key:'interest', label:'Interest Coverage',   sub:'x EBIT / interest',   dir:'high' },
+  ]},
+  { section:'Stock Behaviour', rows:[
+    { key:'w52h',     label:'52W High (₦)',        sub:'Highest price',       dir:'neutral' },
+    { key:'w52l',     label:'52W Low (₦)',         sub:'Lowest price',        dir:'neutral' },
+    { key:'beta',     label:'Beta',                sub:'Volatility vs market',dir:'low' },
+    { key:'volume',   label:'Avg Daily Volume',    sub:'Trading liquidity',   dir:'high' },
+  ]},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────
+let N = 5;
+let stockNames = ['','','','',''];
+
+// ── INIT ──────────────────────────────────────────────────────────────
+document.getElementById('hdr-date').textContent =
+  new Date().toLocaleDateString('en-NG',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+
+function buildSheet() {
+  N = parseInt(document.getElementById('stock-count').value);
+  buildHeaders();
+  buildTable();
+  calcAll();
+}
+
+function setSector() {
+  // nothing extra needed, sector is read on save
+}
+
+function buildHeaders() {
+  const wrap = document.getElementById('stock-headers');
+  wrap.style.gridTemplateColumns = 'repeat('+N+', 1fr)';
+  wrap.innerHTML = '';
+  for(let i=0;i<N;i++){
+    const div = document.createElement('div');
+    div.className = 'stock-head-input';
+    div.innerHTML = `
+      <span class="stock-num">#${i+1}</span>
+      <span class="color-dot" style="background:${COLORS[i]};"></span>
+      <input type="text" placeholder="Company name..." id="sname-${i}" value="${stockNames[i]||''}"
+        oninput="stockNames[${i}]=this.value; updateColHeaders();" />
+    `;
+    wrap.appendChild(div);
+  }
+}
+
+function buildTable() {
+  const tbl = document.getElementById('main-table');
+  tbl.innerHTML = '';
+
+  // col header row
+  const hrow = document.createElement('tr');
+  const th0 = document.createElement('td');
+  th0.className = 'col-header';
+  th0.style.textAlign = 'left';
+  th0.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;">Metric</span>';
+  hrow.appendChild(th0);
+  for(let i=0;i<N;i++){
+    const th = document.createElement('td');
+    th.className = 'col-header';
+    th.id = 'col-hdr-'+i;
+    const name = stockNames[i] || 'Stock '+(i+1);
+    th.innerHTML = `<span class="col-dot" style="background:${COLORS[i]};"></span><span class="col-name" id="col-name-${i}">${name}</span>`;
+    hrow.appendChild(th);
+  }
+  tbl.appendChild(hrow);
+
+  // metric rows
+  METRICS.forEach(sec => {
+    // section header
+    const srow = document.createElement('tr');
+    srow.className = 'sec-row';
+    const std = document.createElement('td');
+    std.colSpan = N+1;
+    std.textContent = sec.section;
+    srow.appendChild(std);
+    tbl.appendChild(srow);
+
+    sec.rows.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.className = 'data-row';
+      tr.dataset.key = row.key;
+      tr.dataset.dir = row.dir;
+
+      const labelTd = document.createElement('td');
+      labelTd.className = 'metric-label';
+      labelTd.innerHTML = row.label + (row.sub ? '<span>'+row.sub+'</span>' : '');
+      tr.appendChild(labelTd);
+
+      for(let i=0;i<N;i++){
+        const td = document.createElement('td');
+        td.className = 'cell';
+        td.dataset.col = i;
+        td.innerHTML = `<input class="cell-input" type="text" placeholder="—" id="cell-${row.key}-${i}" />`;
+        tr.appendChild(td);
+      }
+      tbl.appendChild(tr);
+    });
+  });
+
+  // Score row
+  const scoreRow = document.createElement('tr');
+  scoreRow.className = 'score-row';
+  const slabel = document.createElement('td');
+  slabel.className = 'label-cell';
+  slabel.innerHTML = '<span class="score-label">Overall Score</span>';
+  scoreRow.appendChild(slabel);
+  for(let i=0;i<N;i++){
+    const td = document.createElement('td');
+    td.id = 'score-td-'+i;
+    td.innerHTML = `<div class="score-label">Score</div><div class="score-val" id="score-val-${i}" style="color:${COLORS[i]};">—</div><div class="score-bar-wrap"><div class="score-bar" id="score-bar-${i}" style="background:${COLORS[i]};width:0%;"></div></div>`;
+    scoreRow.appendChild(td);
+  }
+  tbl.appendChild(scoreRow);
+
+  // Verdict row
+  const verdictRow = document.createElement('tr');
+  verdictRow.className = 'verdict-row';
+  const vlabel = document.createElement('td');
+  vlabel.style.cssText = 'padding:12px 16px;background:var(--bg2);border-top:1px solid var(--border);';
+  vlabel.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;">Verdict</span>';
+  verdictRow.appendChild(vlabel);
+  for(let i=0;i<N;i++){
+    const td = document.createElement('td');
+    td.id = 'verdict-td-'+i;
+    td.style.cssText = 'padding:12px 14px;text-align:center;border-top:1px solid var(--border);background:var(--bg2);border-right:1px solid var(--border);';
+    if(i===N-1) td.style.borderRight='none';
+    td.innerHTML = '<span class="verdict-pill pill-empty" id="verdict-pill-'+i+'">—</span>';
+    verdictRow.appendChild(td);
+  }
+  tbl.appendChild(verdictRow);
+
+  // Medal row
+  const medalRow = document.createElement('tr');
+  medalRow.className = 'medal-row';
+  const mlabel = document.createElement('td');
+  mlabel.style.cssText = 'padding:10px 16px;text-align:left;background:var(--bg);border-top:none;';
+  mlabel.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;">Rank</span>';
+  medalRow.appendChild(mlabel);
+  for(let i=0;i<N;i++){
+    const td = document.createElement('td');
+    td.id = 'medal-td-'+i;
+    td.style.cssText = 'padding:10px 14px;text-align:center;background:var(--bg);border-right:1px solid var(--border);';
+    if(i===N-1) td.style.borderRight='none';
+    td.innerHTML = '<span class="medal" id="medal-'+i+'"></span><span class="medal-label" id="medal-label-'+i+'"></span>';
+    medalRow.appendChild(td);
+  }
+  tbl.appendChild(medalRow);
+}
+
+function updateColHeaders() {
+  for(let i=0;i<N;i++){
+    const el = document.getElementById('col-name-'+i);
+    if(el) el.textContent = stockNames[i] || 'Stock '+(i+1);
+  }
+}
+
+// ── SCORING ───────────────────────────────────────────────────────────
+function calcAll() {
+  // Update col headers from inputs
+  for(let i=0;i<N;i++){
+    const inp = document.getElementById('sname-'+i);
+    if(inp) stockNames[i] = inp.value;
+  }
+  updateColHeaders();
+
+  const scores = new Array(N).fill(0);
+  const maxScores = new Array(N).fill(0);
+
+  document.querySelectorAll('tr.data-row').forEach(row => {
+    const key = row.dataset.key;
+    const dir = row.dataset.dir;
+    if(dir === 'neutral') return;
+
+    const vals = [];
+    for(let i=0;i<N;i++){
+      const inp = document.getElementById('cell-'+key+'-'+i);
+      const v = inp ? parseFloat(inp.value.replace(/[^0-9.\-]/g,'')) : NaN;
+      vals.push(v);
+    }
+
+    const valid = vals.filter(v => !isNaN(v));
+    if(valid.length < 2) {
+      // clear highlights
+      row.querySelectorAll('td.cell').forEach(td => {td.classList.remove('best','worst');});
+      return;
+    }
+
+    const best = dir==='high' ? Math.max(...valid) : Math.min(...valid);
+    const worst = dir==='high' ? Math.min(...valid) : Math.max(...valid);
+
+    row.querySelectorAll('td.cell').forEach((td,i) => {
+      td.classList.remove('best','worst');
+      if(isNaN(vals[i])) return;
+      if(vals[i]===best && best!==worst){ td.classList.add('best'); scores[i]+=2; }
+      else if(vals[i]===worst && best!==worst){ td.classList.add('worst'); }
+      else { scores[i]+=1; }
+      maxScores[i]+=2;
+    });
+  });
+
+  // Normalise to %
+  const maxPossible = Math.max(...maxScores,1);
+  const pcts = scores.map((s,i) => maxScores[i]>0 ? Math.round((s/maxScores[i])*100) : 0);
+
+  // Rank
+  const ranked = [...pcts].map((p,i)=>({i,p})).sort((a,b)=>b.p-a.p);
+  const medals = ['🥇','🥈','🥉','',''];
+  const rankLabels = ['1st','2nd','3rd','4th','5th'];
+
+  pcts.forEach((pct,i) => {
+    const bar = document.getElementById('score-bar-'+i);
+    const val = document.getElementById('score-val-'+i);
+    if(bar) bar.style.width = pct+'%';
+    if(val) val.textContent = pct+'%';
+
+    // verdict
+    const pill = document.getElementById('verdict-pill-'+i);
+    if(pill){
+      if(maxScores[i]===0){pill.className='verdict-pill pill-empty';pill.textContent='—';}
+      else if(pct>=70){pill.className='verdict-pill pill-strong';pill.textContent='Strong buy';}
+      else if(pct>=45){pill.className='verdict-pill pill-caution';pill.textContent='Caution';}
+      else{pill.className='verdict-pill pill-avoid';pill.textContent='Avoid';}
+    }
+
+    // medal
+    const rank = ranked.findIndex(r=>r.i===i);
+    const mEl = document.getElementById('medal-'+i);
+    const mlEl = document.getElementById('medal-label-'+i);
+    if(mEl) mEl.textContent = maxScores[i]>0 ? (medals[rank]||'') : '';
+    if(mlEl) mlEl.textContent = maxScores[i]>0 ? rankLabels[rank] : '';
+  });
+
+  // Journal banner
+  const topPicks = ranked.filter(r=>pcts[r.i]>=55 && maxScores[r.i]>0).slice(0,2);
+  const banner = document.getElementById('journal-banner');
+  const picks = document.getElementById('journal-picks');
+  if(topPicks.length>0){
+    banner.style.display='flex';
+    picks.textContent = topPicks.map(r=>{
+      const n = stockNames[r.i]||'Stock '+(r.i+1);
+      return n+' ('+pcts[r.i]+'%)';
+    }).join('  →  ');
+  } else {
+    banner.style.display='none';
+  }
+}
+
+// ── SAVE / LOAD ───────────────────────────────────────────────────────
+function saveComparison() {
+  const sector = document.getElementById('sector-select').value || 'Uncategorised';
+  const names = [];
+  for(let i=0;i<N;i++){
+    const inp = document.getElementById('sname-'+i);
+    names.push(inp?inp.value.trim():'');
+  }
+  if(names.every(n=>!n)){alert('Please enter at least one stock name.');return;}
+
+  // collect all cell data
+  const cells = {};
+  METRICS.forEach(sec=>sec.rows.forEach(row=>{
+    cells[row.key]=[];
+    for(let i=0;i<N;i++){
+      const inp=document.getElementById('cell-'+row.key+'-'+i);
+      cells[row.key].push(inp?inp.value:'');
+    }
+  }));
+
+  const entry={
+    sector,names,N,cells,
+    date:new Date().toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}),
+    winner:names.find(n=>n)||''
+  };
+
+  const history=JSON.parse(localStorage.getItem('scs-history')||'[]');
+  history.unshift(entry);
+  localStorage.setItem('scs-history',JSON.stringify(history.slice(0,15)));
+  renderHistory();
+  alert('Comparison saved!');
+}
+
+function renderHistory(){
+  const history=JSON.parse(localStorage.getItem('scs-history')||'[]');
+  const grid=document.getElementById('history-grid');
+  if(!history.length){grid.innerHTML='<p class="empty-state">No saved comparisons yet.</p>';return;}
+  grid.innerHTML=history.map((e,i)=>`
+    <div class="history-card" onclick="loadEntry(${i})">
+      <div>
+        <div class="hc-sector">${e.sector}</div>
+        <div class="hc-stocks">${e.names.filter(n=>n).join(' · ')}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="hc-date">${e.date}</span>
+        ${e.winner?'<span class="hc-winner">'+e.winner+'</span>':''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadEntry(i){
+  const history=JSON.parse(localStorage.getItem('scs-history')||'[]');
+  const e=history[i];
+  if(!e)return;
+  document.getElementById('stock-count').value=e.N;
+  N=e.N;
+  stockNames=[...e.names];
+  const sel=document.getElementById('sector-select');
+  if(sel) sel.value=e.sector;
+  buildHeaders();
+  buildTable();
+  // fill cells
+  METRICS.forEach(sec=>sec.rows.forEach(row=>{
+    if(!e.cells[row.key])return;
+    for(let i=0;i<N;i++){
+      const inp=document.getElementById('cell-'+row.key+'-'+i);
+      if(inp) inp.value=e.cells[row.key][i]||'';
+    }
+  }));
+  calcAll();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function resetSheet(){
+  stockNames=['','','','',''];
+  document.getElementById('sector-select').value='';
+  buildHeaders();
+  buildTable();
+  document.getElementById('journal-banner').style.display='none';
+}
+
+// ── BOOT ─────────────────────────────────────────────────────────────
+buildSheet();
+renderHistory();
+</script>
+</body>
+</html>
