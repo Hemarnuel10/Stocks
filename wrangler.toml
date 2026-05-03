@@ -1,0 +1,5 @@
+your-repo/
+├── wrangler.toml
+└── public/
+    ├── stock-comparison-sheet.html
+    └── stock-research-journal.html
